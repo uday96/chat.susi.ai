@@ -29,13 +29,13 @@ class Settings extends Component {
 
 	handleSubmit = () => {
 		let newTheme = this.state.theme;
-		let newDefaultServer = this.state.server;
-		if(newDefaultServer.slice(-1)==='/'){
-			newDefaultServer = newDefaultServer.slice(0,-1);
+		let newServer = this.state.server;
+		if(newServer.slice(-1)==='/'){
+			newServer = newServer.slice(0,-1);
 		}
 		let vals = {
 			theme: newTheme,
-			server: newDefaultServer
+			server: newServer
 		}
 		this.props.onSettingsSubmit(vals);
 	}

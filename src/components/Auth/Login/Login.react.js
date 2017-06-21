@@ -10,6 +10,7 @@ import PropTypes  from 'prop-types';
 import Cookies from 'universal-cookie';
 import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton';
 import UserPreferencesStore from '../../../stores/UserPreferencesStore';
+//import * as Actions from '../../../actions/';
 
 const cookies = new Cookies();
 
@@ -163,6 +164,8 @@ class Login extends Component {
 			cookies.set('loggedIn', loggedIn, { path: '/', maxAge: time });
 			this.props.history.push('/', { showLogin: false });
 			window.location.reload();
+			//let BASE_URL = cookies.get('serverUrl');
+			//Actions.serverChanged(BASE_URL);
 		}
 		else {
 			this.setState({

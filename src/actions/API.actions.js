@@ -48,7 +48,7 @@ export function createSUSIMessage(createdMessage, currentThreadID) {
   };
 
   let defaults = UserPreferencesStore.getPreferences();
-  let defaultServerURL = defaults.Server;
+  let defaultServerURL = defaults.StandardServer;
   let BASE_URL = '';
   if(cookies.get('serverUrl')===defaultServerURL||
     cookies.get('serverUrl')===null||
@@ -58,6 +58,7 @@ export function createSUSIMessage(createdMessage, currentThreadID) {
   else{
     BASE_URL= cookies.get('serverUrl');
   }
+  //BASE_URL = defaults.Server;
   let url = '';
   // Fetching local browser language
   var locale = document.documentElement.getAttribute('lang');

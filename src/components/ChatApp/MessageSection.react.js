@@ -24,6 +24,7 @@ import Dialog from 'material-ui/Dialog';
 import RaisedButton from 'material-ui/RaisedButton';
 import { CirclePicker } from 'react-color';
 import HardwareComponent from './HardwareComponent';
+
 const cookies = new Cookies();
 
 function getStateFromStores() {
@@ -179,10 +180,18 @@ class MessageSection extends Component {
     }
   }
 
+  changeServer = (server) => {
+    let currServer = cookies.get('serverUrl');
+    console.log(currServer);
+    if(server !== currServer){
+      cookies.set('serverUrl', server, { path: '/' });
+    }
+  }
+
   implementSettings = (values) => {
     this.setState({showSettings: false});
     this.changeTheme(values.theme);
-    // Actions.setDefaultServer(values.server);
+    this.changeServer(values.server);
   }
 
   componentDidMount() {
