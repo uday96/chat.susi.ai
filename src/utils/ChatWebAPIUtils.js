@@ -19,7 +19,7 @@ export function getAllMessages() {
 };
 
 export function getHistory(){
-	Actions.getHistory();
+	Actions.getHistory(true,null);
 }
 
 export function getLocation(){

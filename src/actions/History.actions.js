@@ -3,13 +3,17 @@ import $ from 'jquery';
 import ChatAppDispatcher from '../dispatcher/ChatAppDispatcher';
 import ChatConstants from '../constants/ChatConstants';
 import UserPreferencesStore from '../stores/UserPreferencesStore';
+import MessageStore from '../stores/MessageStore';
 
 const cookies = new Cookies();
 
 let ActionTypes = ChatConstants.ActionTypes;
 
 
-export function getHistory() {
+export function getHistory(initialCall, prevMessageCount) {
+  if(prevMessageCount === null || prevMessageCount === undefined){
+    prevMessageCount = 0;
+  }
   let BASE_URL = '';
   let defaults = UserPreferencesStore.getPreferences();
   let defaultServerURL = defaults.Server;
@@ -26,11 +30,27 @@ export function getHistory() {
   let url = '';
   if(cookies.get('loggedIn')===null||
     cookies.get('loggedIn')===undefined){
-    url = BASE_URL+'/susi/memory.json';
+    url = BASE_URL+'/susi/memory.json?cognitions=5';
   }
   else{
-    url = BASE_URL+'/susi/memory.json?access_token='+cookies.get('loggedIn');
+    url = BASE_URL+'/susi/memory.json?cognitions=5&access_token='+cookies.get('loggedIn');
   }
+
+  let historyMeta = MessageStore.getHistoryMeta();
+  if(historyMeta.cognitions_remaining !== null){
+    if(historyMeta.cognitions_remaining === 0){
+      return;
+    }
+    else if (historyMeta.last_msg_date === null) {
+      return;
+    }
+    else {
+      let lastMsgDate = historyMeta.last_msg_date;
+      url += '&date='+lastMsgDate;
+    }
+  }
+
+  console.log(url);
   $.ajax({
     url: url,
     dataType: 'jsonp',
@@ -38,6 +58,30 @@ export function getHistory() {
     timeout: 3000,
     async: false,
     success: function (history) {
+      console.log(history);
+      let cogLength = history.cognitions.length;
+      if(cogLength === 0){
+        return;
+      }
+      console.log(initialCall);
+      if(!initialCall){
+        history.cognitions.splice(0,1);
+        cogLength = history.cognitions.length;
+      }
+      let historyMetaData = {
+        cognitions_remaining: history.cognitions_remaining,
+        last_msg_date: history.cognitions[cogLength-1].query_date,
+        prevMessageCount: prevMessageCount,
+        cognitions_added: cogLength,
+      }
+
+      ChatAppDispatcher.dispatch({
+        type: ActionTypes.STORE_HISTORY_META,
+        historyMetaData
+      });
+
+      history.cognitions[cogLength-1].lastCog = true;
+
       history.cognitions.forEach((cognition) => {
 
         let susiMsg = {

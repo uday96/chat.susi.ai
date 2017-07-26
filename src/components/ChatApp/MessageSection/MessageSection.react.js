@@ -16,6 +16,7 @@ import $ from 'jquery';
 import { Scrollbars } from 'react-custom-scrollbars';
 import TopBar from '../TopBar.react';
 import TextField from 'material-ui/TextField';
+import Loading from 'react-loading-animation';
 
 function getStateFromStores() {
   return {
@@ -497,6 +498,17 @@ class MessageSection extends Component {
     })
   }
 
+  onScrollStop = () => {
+    let ul = this.scrollarea;
+    if (ul) {
+      if(ul.viewScrollTop === 0){
+        //load history
+        let existingMsgs = MessageStore.getAllForCurrentThreadWithoutDate();
+        Actions.getHistory(false,existingMsgs.length);
+      }
+    }
+  }
+
   componentWillUnmount() {
     MessageStore.removeChangeListener(this._onChange.bind(this));
     ThreadStore.removeChangeListener(this._onChange.bind(this));
@@ -740,9 +752,11 @@ class MessageSection extends Component {
 
                   <Scrollbars
                     ref={(ref) => { this.scrollarea = ref; }}
+                    onScrollStop={this.onScrollStop}
                     autoHide
                     autoHideTimeout={1000}
                     autoHideDuration={200}>
+                    <Loading isLoading={MessageStore.getHistoryStatus()}/>
                     {messageListItems}
                     {this.state.showLoading && getLoadingGIF()}
                   </Scrollbars>
@@ -865,7 +879,23 @@ class MessageSection extends Component {
   _scrollToBottom = () => {
   let ul = this.scrollarea;
   if (ul) {
-    ul.scrollTop(ul.getScrollHeight());
+    let currMsgs =  MessageStore.getAllForCurrentThreadWithoutDate();
+    let historyMeta = MessageStore.getHistoryMeta();
+    let messagesAdded = 2*historyMeta.cognitions_added;
+    let prevMessageCount = MessageStore.getPrevMsgCount();
+    let historyFetchedState = (currMsgs.length === (prevMessageCount + messagesAdded));
+    if(historyFetchedState){
+      let scrollIndex = messagesAdded;
+      if(scrollIndex && scrollIndex >= 0){
+        ul.view.childNodes[scrollIndex].scrollIntoView();
+      }
+      else{
+          ul.scrollTop(ul.getScrollHeight());
+      }
+    }
+    else{
+        ul.scrollTop(ul.getScrollHeight());
+    }
   }
 }
 

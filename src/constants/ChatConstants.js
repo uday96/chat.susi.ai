@@ -10,6 +10,7 @@ export default {
     RECEIVE_SUSI_MESSAGE: null,
     RECEIVE_RAW_MESSAGES: null,
     STORE_HISTORY_MESSAGE: null,
+    STORE_HISTORY_META: null,
     SERVER_CHANGED: null,
     INIT_SETTINGS: null,
     SETTINGS_CHANGED: null,

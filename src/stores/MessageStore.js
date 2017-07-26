@@ -10,6 +10,13 @@ let lang = 'en-US';
 let _messages = {};
 let _feedback = {};
 let _showLoading = false;
+let _showHistoryLoading = false;
+let _prevMessageCount = 0;
+let _history = {
+    cognitions_remaining: null,
+    last_msg_date: null,
+    cognitions_added: null,
+  };
 
 function _markAllInThreadRead(threadID) {
   for (let id in _messages) {
@@ -82,6 +89,18 @@ let MessageStore = {
     return _showLoading;
   },
 
+  getHistoryStatus(){
+    return _showHistoryLoading;
+  },
+
+  getPrevMsgCount(){
+    return _prevMessageCount;
+  },
+
+  getHistoryMeta(){
+    return _history;
+  },
+
   getFeedback(){
     return _feedback;
   },
@@ -110,6 +129,10 @@ let MessageStore = {
 
   getAllForCurrentThread() {
     return _addDates(this.getAllForThread(ThreadStore.getCurrentID()));
+  },
+
+  getAllForCurrentThreadWithoutDate() {
+    return this.getAllForThread(ThreadStore.getCurrentID());
   },
 
   resetVoiceForThread(threadID) {
@@ -170,6 +193,19 @@ MessageStore.dispatchToken = ChatAppDispatcher.register(action => {
     case ActionTypes.STORE_HISTORY_MESSAGE: {
       let message = action.message;
       _messages[message.id] = message;
+      _showHistoryLoading = false;
+      MessageStore.emitChange();
+      break;
+    }
+
+    case ActionTypes.STORE_HISTORY_META: {
+      let history = action.historyMetaData;
+      _history.cognitions_remaining = history.cognitions_remaining;
+      _history.last_msg_date = history.last_msg_date;
+      _history.cognitions_added = history.cognitions_added;
+      _prevMessageCount = history.prevMessageCount;
+      _showHistoryLoading = true;
+      console.log(_history);
       MessageStore.emitChange();
       break;
     }
